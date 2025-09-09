@@ -4,7 +4,7 @@
 	  <TargetFramework>netstandard2.0</TargetFramework>
 	  <IsPackable>true</IsPackable>
 	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-	  <PackageId>EventFlowChannel</PackageId>
+	  <PackageId>Potapich.EventFlowChannel</PackageId>
 	  <Version>1.0.1</Version>
 	  <Authors>Mikhail Potapov</Authors>
 	  <Description>High-performance event-driven processing system with channel-based architecture.</Description>
@@ -14,7 +14,7 @@
 	  <Copyright>Mikhail Potapov</Copyright>
 	  <PackageProjectUrl>https://github.com/potapich1978/EventFlowChannel.git</PackageProjectUrl>
 	  <PackageReadmeFile>README.MD</PackageReadmeFile>
-	  <PackageLicenseUrl>https://licenses.nuget.org/MIT</PackageLicenseUrl>
+	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
 	  <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
@@ -28,7 +28,7 @@
   </ItemGroup>	
 	
   <ItemGroup>
-    <ProjectReference Include="..\ChannelFactory\ChannelFactory.csproj" PrivateAssets="all"/>
+    <ProjectReference Include="..\ChannelFactory\ChannelFactory.csproj" PrivateAssets="all" />
   </ItemGroup>
 
 	<ItemGroup>
