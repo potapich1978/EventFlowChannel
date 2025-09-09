@@ -9,6 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\ChannelFactory\ChannelFactory.csproj" />
       <ProjectReference Include="..\EventChannelBuilder\EventChannelBuilder.csproj" />
     </ItemGroup>
     
