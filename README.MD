@@ -1,6 +1,7 @@
 ![Tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/potapich1978/c15fb9d197b16fda54ddaa8758566ce4/raw/test-status.json)
 ![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/potapich1978/7fc2289aef2d6408005f3fa009069786/raw/coverage.json)
 ![License](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/potapich1978/193c9aa84b5eb75ae534e41d9764e65c/raw/license.json)
+[![NuGet](https://img.shields.io/nuget/v/Potapich.EventFlowChannel.svg)](https://www.nuget.org/packages/Potapich.EventFlowChannel)
 
 # Event Dispatcher Architecture with Channel-Based Processing
 
