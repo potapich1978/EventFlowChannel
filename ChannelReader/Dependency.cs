@@ -42,7 +42,7 @@ namespace ChannelReader
         /// The assembly containing all event handler implementations for the given event type.
         /// </param>
         /// <returns>The updated <see cref="IServiceCollection"/> with event dispatcher services registered.</returns>
-        private static IServiceCollection AddEventDispatcher<T>(this IServiceCollection services, Assembly handlersImplementationAssembly)
+        public static IServiceCollection AddEventDispatcher<T>(this IServiceCollection services, Assembly handlersImplementationAssembly)
              where T : IComparable
         {
             return services
