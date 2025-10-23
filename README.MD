@@ -176,3 +176,16 @@ public class SerilogAdapter : IGenericEventDispatcherLogger
     public void LogError(string message, Exception ex) => Serilog.Log.Error(ex, message);
 }
 ```
+
+### Use IEventDispatcher without queue
+Starting with version 1.1.0, the ability to explicitly register an event handler 
+without registering a message channel has been added.
+
+```cs
+using ChannelReader;
+
+services.AddEventDispatcher<EventType>(typeof(Startup).Assembly)
+        .AddSingleton<IGenericEventDispatcherLogger, MyLogger>();
+```
+
+
