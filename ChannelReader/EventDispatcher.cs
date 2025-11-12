@@ -49,8 +49,7 @@ namespace ChannelReader
                     _logger.LogError($"[{DateTime.Now:dd:MM:yy HH:mm:ss} EventDispatcher] " +
                                       $"unhandled exception was throw in handler for event with type {@event.EventType}: " +
                                       $"{ex}");
-
-                    //await Task.CompletedTask;
+                    throw;
                 }
             }
             else

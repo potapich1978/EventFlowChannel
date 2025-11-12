@@ -52,7 +52,13 @@ namespace ChannelReader.tests
             var dispatcher = new EventDispatcher<string>(handlers, logger);
 
             // Act
-            await dispatcher.DispatchEventAsync(@event);
+            try
+            {
+                await dispatcher.DispatchEventAsync(@event);
+            }
+            catch 
+            {
+            }
 
             // Assert
             await handler.Received(1).HandleAsync(@event);
