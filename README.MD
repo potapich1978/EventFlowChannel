@@ -77,7 +77,7 @@ The architecture combines the flexibility of event-driven programming with the r
 
 ## Installation
 ```xml
-<PackageReference Include="Potapich.EventFlowChannel" Version="1.0.1" />
+<PackageReference Include="Potapich.EventFlowChannel" Version="1.3.0" />
 ```
 
 ## Quick Start
