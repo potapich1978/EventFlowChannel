@@ -1,0 +1,59 @@
+v.1.3.0
+New Features
+1. Enhanced Async Enqueue Method
+Added EnqueueAsync(IGenericEvent<T> message, CancellationToken token) method to IChannel<T> interface
+
+Provides better cancellation support with explicit cancellation tokens
+
+Allows producers to control timeout behavior, particularly useful with BoundedChannelFullMode.Wait
+
+Implements proper token linking between caller-controlled cancellation and channel lifecycle cancellation
+
+2. Improved Logging Interface
+Added void LogMessage(string message) method to IGenericEventDispatcherLogger interface
+
+Provides basic logging capability for informational messages alongside existing warning and error logging
+
+3. New Exception Type
+Added CancelEnqueueMessageException class for representing cancellation of enqueue operations
+
+Provides clear distinction between channel closure and user-requested cancellation
+
+Used in the new EnqueueAsync method to communicate cancellation reasons
+
+Deprecations
+1. Legacy Enqueue Method
+Marked ValueTask Enqueue(IGenericEvent<T> message) method as [Obsolete] in IChannel<T> interface
+
+The method will be removed in version 2.0.0
+
+Added clear message directing users to migrate to EnqueueAsync method
+
+The legacy method now throws ChannelClosedException when channel is not running
+
+Breaking Changes
+1. Interface Changes
+IChannel<T> interface now requires implementation of EnqueueAsync method
+
+All implementations must be updated to support the new async pattern
+
+Consumers of the interface should migrate to the new async method for better cancellation support
+
+Improvements
+1. Cancellation Handling
+Improved cancellation semantics in BaseChannelReader.EnqueueAsync
+
+Clear separation between user cancellation and channel stop cancellation
+
+Proper cleanup of linked cancellation token sources
+
+2. Thread Safety
+Enhanced thread safety in BaseChannelReader with proper volatile reads and locks
+
+Better state management for channel running status
+
+3. Error Reporting
+More specific exception types for different error conditions
+
+Better exception messages and inner exception preservation
+
