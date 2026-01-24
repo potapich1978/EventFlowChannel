@@ -1,5 +1,6 @@
 ﻿using ChannelReader.Abstract;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Channels;
 
@@ -24,16 +25,23 @@ namespace ChannelFactory.Abstract
         /// Must be called before enqueuing events.
         /// </summary>
         void Start();
+        
+        [Obsolete("Use EnqueueAsync instead. Will be removed in v2.0.")]
+        ValueTask Enqueue(IGenericEvent<T> messageReadAsync);
 
         /// <summary>
-        /// Enqueues a new event into the channel for asynchronous processing.
+        /// Enqueues a message to the channel.
         /// </summary>
-        /// <param name="message">The event to enqueue.</param>
-        /// <returns>
-        /// A <see cref="ValueTask"/> representing the asynchronous operation.
-        /// <para>If the channel is not ready, the task will complete with an <see cref="ChannelClosedException"/></para>
-        /// <para>If channel is closing, the task will complete with an <see cref="TaskCanceledException"/></para>
-        /// </returns>
-        ValueTask Enqueue(IGenericEvent<T> message);
+        /// <param name="message">The message to enqueue.</param>
+        /// <param name="token">
+        /// A cancellation token that can be used to cancel the write operation.
+        /// When using BoundedChannelFullMode.Wait, consider providing a timeout
+        /// to prevent uncontrolled memory growth with slow consumers and fast producers.
+        /// </param>
+        /// <returns>A ValueTask representing the asynchronous operation.</returns>
+        /// <exception cref="ChannelClosedException">Thrown when the channel is not running.</exception>
+        /// <exception cref="CancelEnqueueMessageException">Thrown when the operation is cancelled by channel stop.</exception>
+        /// <exception cref="OperationCanceledException">Thrown when the operation is cancelled by the provided token.</exception>
+        ValueTask EnqueueAsync(IGenericEvent<T> message, CancellationToken token);
     }
 }

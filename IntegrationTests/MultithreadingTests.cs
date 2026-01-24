@@ -21,24 +21,9 @@ namespace IntegrationTests
         }
 
         /// <summary>
-        /// implementation of event handler for testing
-        /// </summary>
-        private class CustomEventHandler : IGenericEventHandler<int>
-        {
-            public int EventType => 1;
-
-            public async Task HandleAsync(IGenericEvent<int> @event, CancellationToken token = default)
-            {
-                //take some time for simulate payload
-                await Task.Delay(1, token);
-                await Task.CompletedTask;
-            }
-        }
-
-        /// <summary>
         /// produce channel builder
         /// </summary>
-        /// <typeparam name="T" <see cref="IComparable"/>>type of event</typeparam>
+        /// <typeparam name="T"  />
         /// <returns>bounded channel</returns>
         private static IChannelBuilder<T> ProduceChannelBuilder<T>()
             where T : IComparable
@@ -55,7 +40,7 @@ namespace IntegrationTests
         /// <summary>
         /// produce BoundedChannel
         /// </summary>
-        /// <typeparam name="T" <see cref="IComparable"/>>type of event</typeparam>
+        /// <typeparam name="T" />
         /// <returns>bounded channel</returns>
         private static IChannel<T> ProduceBoundedChannel<T>(int capacity, int readersCount, BoundedChannelFullMode fullMode)
             where T : IComparable
@@ -72,7 +57,7 @@ namespace IntegrationTests
         /// <summary>
         /// produce UnboundedChannel
         /// </summary>
-        /// <typeparam name="T" <see cref="IComparable"/>>type of event</typeparam>
+        /// <typeparam name="T" />
         /// <returns>unbounded channel</returns>
         private static IChannel<T> ProduceUnboundedChannel<T>(int readersCount)
             where T : IComparable
@@ -87,41 +72,59 @@ namespace IntegrationTests
         /// <summary>
         /// produce test data 
         /// </summary>
-        /// <param name="channel" <see cref="IChannel{T}">>bounded or unbounded channel</param>
-        /// <param name="unexpectedExceptions">container for save exception</param>
         /// <returns>container with test data</returns>
         private static List<Task> ProduceTestTasks(IChannel<int> channel,
             ConcurrentBag<Exception> unexpectedExceptions, ConcurrentBag<Exception> expectedExceptions)
         {
             var random = new Random();
-            return [.. Enumerable.Range(0, 100_000).Select( i =>
+            return [.. Enumerable.Range(0, 100_000).Select( _ =>
             {
                 var rnd = random.Next(100);
-                if (rnd < 33)
+                return rnd switch
                 {
-                    return Task.Run(()=>{
+                    < 33 => Task.Run(() =>
+                    {
                         // We don't expect exceptions, but if they occur, we'll save them
-                        try { channel.Start(); } catch (Exception e) { unexpectedExceptions.Add(e); }
+                        try
+                        {
+                            channel.Start();
+                        }
+                        catch (Exception e)
+                        {
+                            unexpectedExceptions.Add(e);
+                        }
+
                         Task.Delay(1);
-                    });
-                }
-                else if (rnd > 33 && rnd < 66)
-                {
-                    return Task.Run(()=>{
+                    }),
+                    > 33 and < 66 => Task.Run(() =>
+                    {
                         // We don't expect exceptions, but if they occur, we'll save them
-                        try { channel.Stop(); } catch (Exception e) { unexpectedExceptions.Add(e); }
+                        try
+                        {
+                            channel.Stop();
+                        }
+                        catch (Exception e)
+                        {
+                            unexpectedExceptions.Add(e);
+                        }
+
                         Task.Delay(1);
-                    });
-                }
-                else
-                {
-                    return Task.Run(async ()=>{
+                    }),
+                    _ => Task.Run(async () =>
+                    {
                         // We expect exceptions from Enqueue, we'll save them for check later
-                        try { await channel.Enqueue(new CustomEvent()); }
-                        catch (Exception e) { expectedExceptions.Add(e); }
+                        try
+                        {
+                            await channel.Enqueue(new CustomEvent());
+                        }
+                        catch (Exception e)
+                        {
+                            expectedExceptions.Add(e);
+                        }
+
                         await Task.Delay(1);
-                    });
-                }
+                    })
+                };
             })];
         }
 
@@ -176,7 +179,7 @@ namespace IntegrationTests
 
             //Action
             var timeoutTask = Task.Delay(TimeSpan.FromSeconds(30));
-            var completedTask = await Task.WhenAny(Task.WhenAll(tasks), timeoutTask);
+            _ = await Task.WhenAny(Task.WhenAll(tasks), timeoutTask);
             // After stress test, make sure we can start and stop channel without errors
             channel.Stop();
             channel.Start();

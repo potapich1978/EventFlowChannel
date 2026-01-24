@@ -29,5 +29,11 @@ namespace EventLogger
         /// <param name="message">The error message to log.</param>
         /// <param name="exception">The exception that caused the error condition.</param>
         void LogError(string message, Exception exception);
+
+        /// <summary>
+        /// Logs a message
+        /// </summary>
+        /// <param name="message">The error message to log.</param>
+        void LogMessage(string message);
     }
 }

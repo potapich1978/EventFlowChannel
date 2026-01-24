@@ -1,7 +1,6 @@
 using ChannelFactory.Abstract;
 using ChannelReader.Abstract;
 using NSubstitute;
-using System.Collections.Concurrent;
 using System.Threading.Channels;
 
 namespace ChannelFactory.Tests
@@ -148,12 +147,12 @@ namespace ChannelFactory.Tests
             // Use reflection to set InternalChannel to null
             var channelField = typeof(TestChannelReader).GetField("InternalChannel",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            channelField.SetValue(_sut, null);
+            channelField?.SetValue(_sut, null);
 
             // Use reflection to set _isRunning to 1 to bypass the early exit
-            var runningField = typeof(TestChannelReader).GetField("_isRunning",
+            var runningField = typeof(TestChannelReader).GetField("IsRunning",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            runningField.SetValue(_sut, 1);
+            runningField?.SetValue(_sut, 1);
 
             // Act & Assert
             var exception = Record.Exception(() => _sut.Stop());
@@ -169,8 +168,8 @@ namespace ChannelFactory.Tests
         {
             // Arrange
             _sut.Start();
-            _sut._cts=null;
-            _sut._isRunning = 1;
+            _sut.Cts=null;
+            _sut.IsRunning = 1;
 
             // Act & Assert
             var exception = Record.Exception(() => _sut.Stop());

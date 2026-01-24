@@ -38,19 +38,21 @@ The architecture combines the flexibility of event-driven programming with the r
 - Enable multiple writers for high-throughput scenarios
 
 ## Monitoring
-- Implement comprehensive logging
+- Implement comprehensive logging using all three log levels (Message, Warning, Error)
 
 ## Performance Considerations
-- Bounded Channels - Prevent memory overgrowth with configurable capacity
-- Reader Count - Optimize based on workload (I/O vs CPU bound)
-- Channel Options - SingleWriter/SingleReader optimizations available
-- Async/Await - Non-blocking operations throughout the pipeline
+- **Bounded Channels** - Prevent memory overgrowth with configurable capacity
+- **Reader Count** - Optimize based on workload (I/O vs CPU bound)
+- **Channel Options** - SingleWriter/SingleReader optimizations available
+- **Async/Await** - Non-blocking operations throughout the pipeline
+- **Cancellation Support** - Use timeouts to prevent uncontrolled memory growth
 
 ## Example Use Cases
-- Microservices Communication - Event-based service coordination
-- Data Processing Pipelines - Parallel event processing
-- Real-time Applications - WebSocket/gRpc message processing
-- Background Processing - Async task execution
+- **Microservices Communication** - Event-based service coordination
+- **Data Processing Pipelines** - Parallel event processing
+- **Real-time Applications** - WebSocket/gRpc message processing
+- **Background Processing** - Async task execution
+- **Event Sourcing** - Reliable event publishing with configurable backpressure
 
 ## Core Components
 
@@ -69,6 +71,9 @@ The architecture combines the flexibility of event-driven programming with the r
 - [`IBoundedChannelBuilder<T>`](EventChannelBuilder/Abstract/IBoundedChannelBuilder.cs) - Bounded channel-specific options  
 - [`IUnboundedChannelBuilder<T>`](EventChannelBuilder/Abstract/IUnboundedChannelBuilder.cs) - Unbounded channel configuration  
 
+### Exception Types
+- [`CancelEnqueueMessageException`](ChannelFactory/CancelEnqueueMessageException.cs) - User or channel cancellation during enqueue
+- [`ChannelClosedException`] - Channel not ready for operations
 
 ## Installation
 ```xml
@@ -116,6 +121,27 @@ var channel = provider.GetService<IChannelBuilder<EventType>>()
 
 channel.Start();
 
+// Modern async pattern with cancellation support
+using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+try
+{
+    await channel.EnqueueAsync(
+        new UserCreatedEvent { UserName = "John" }, 
+        cts.Token
+    );
+}
+catch (CancelEnqueueMessageException ex)
+{
+    // Handle user cancellation or channel stop
+    Console.WriteLine($"Enqueue cancelled: {ex.Message}");
+}
+catch (ChannelClosedException ex)
+{
+    // Handle channel not ready
+    Console.WriteLine($"Channel closed: {ex.Message}");
+}
+
+// Legacy pattern (deprecated - avoid in new code)
 await channel.Enqueue(new UserCreatedEvent { UserName = "John" });
 ```
 
@@ -132,6 +158,11 @@ var channel = builder.Bounded()
 
 channel.Start();
 
+// Enqueue with timeout to prevent memory issues with Wait mode
+using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+await channel.EnqueueAsync(new UserCreatedEvent { UserName = "Jane" }, timeoutCts.Token);
+
+// Legacy pattern (deprecated - avoid in new code)
 await channel.Enqueue(new UserCreatedEvent { UserName = "John" });
 ```
 
@@ -144,6 +175,10 @@ var channel = builder.Unbounded()
     .Build();
 
 channel.Start();
+
+// Enqueue with timeout to prevent memory issues in unbound channel
+var userToken = new CancellationTokenSource();
+await channel.EnqueueAsync(new UserCreatedEvent { UserName = "Bob" }, userToken.Token);
 
 await channel.Enqueue(new UserCreatedEvent { UserName = "John" });
 ```
@@ -160,7 +195,8 @@ public class MicrosoftLoggerAdapter : IGenericEventDispatcherLogger
     {
         _logger = factory.CreateLogger("EventDispatcher");
     }
-
+    
+    public void LogMessage(string message) => _logger.LogInformation(message);
     public void LogWarning(string message) => _logger.LogWarning(message);
     public void LogError(string message) => _logger.LogError(message);
     public void LogError(string message, Exception ex) => _logger.LogError(ex, message);
@@ -171,6 +207,7 @@ public class MicrosoftLoggerAdapter : IGenericEventDispatcherLogger
 ```cs
 public class SerilogAdapter : IGenericEventDispatcherLogger
 {
+    public void LogMessage(string message) => Serilog.Log.Information(message);
     public void LogWarning(string message) => Serilog.Log.Warning(message);
     public void LogError(string message) => Serilog.Log.Error(message);
     public void LogError(string message, Exception ex) => Serilog.Log.Error(ex, message);
@@ -187,5 +224,11 @@ using ChannelReader;
 services.AddEventDispatcher<EventType>(typeof(Startup).Assembly)
         .AddSingleton<IGenericEventDispatcherLogger, MyLogger>();
 ```
+
+
+## Support
+- [GitHub Issues](https://github.com/potapich1978/EventFlowChannel/issues)
+- **API Documentation**: See XML documentation in source code
+
 
 
